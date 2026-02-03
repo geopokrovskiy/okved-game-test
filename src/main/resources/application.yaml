@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: okved-game-test
+  config:
+    import: classpath:custom.properties
+server:
+  port: 8080

@@ -1,0 +1,35 @@
+@startuml
+participant Actor as A
+participant OkvedController as OC
+participant OkvedProcessor as OP
+participant NumberNormalizer as NN
+participant OkvedService as OS
+participant OkvedScheduler as OSCH
+participant GitHub as GH
+
+A -> OC : POST (body = { "number": "..."})
+OC -> OP : process(number)
+OP -> NN : normalizeNumber(number)
+NN -> OP : response(true/false)
+
+alt normalize true
+
+OP -> OS : processNumber()
+
+OS -> OSCH : getItems()
+OSCH -> OS : response(items)
+OS -> OP : response(responseBody)
+OP -> OC : response (responseBody)
+OC -> A : Response 200 (body = \n {\n"phone_number": "...",\n"okved_number" : "...",\n"okved_code" : "..."\n"matching_length: "..."\n })
+else normalize false
+OP -> OC : response (false)
+OC -> A : Response 400 (body = {"error_message" : "..."})
+end
+
+==periodic==
+OSCH -> GH : getOkvedSchema(cron = '0 0 0 * * *')
+GH -> OSCH : getOkvedSchema()
+
+
+
+@enduml
